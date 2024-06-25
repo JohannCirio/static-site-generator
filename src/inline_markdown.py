@@ -1,11 +1,23 @@
 from textnode import TextNode
 
 def split_nodes_delimiter(old_nodes, delimiter, text_type):
-    new_nodes_list = []
+    final_list = []
     for node in old_nodes:
+        final_list += one_node_spliter([node], delimiter, text_type)
+    return final_list
+
+def one_node_spliter(old_nodes, delimiter, text_type):
+    new_nodes_list = []
+    
+    for node in old_nodes:
+        old_size = len(old_nodes)
+        
         if node.text_type != 'text':
             new_nodes_list.append(node)
-            continue
+
+            if len(old_nodes) == 1:
+                return new_nodes_list
+        
         
         start_position = find_delimiter(node.text, delimiter)
 
@@ -33,7 +45,6 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
     else:
         final_list = new_nodes_list[:-1] + split_nodes_delimiter([new_nodes_list[-1]], delimiter, text_type)
         return final_list
-
 
 def find_delimiter(text, delimiter):
     start_position = text.find(delimiter)
