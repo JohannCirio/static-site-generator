@@ -126,7 +126,7 @@ class TestSplitNodesDelimiter(unittest.TestCase):
     
     def test_text_with_multiple_codes(self):
         text_node = TextNode("Eu `serei` o grande `campeao` desta `copa`", "text")
-        text_node_2 = TextNode("Eu serei", "text")
+        text_node_2 = TextNode("Eu `serei` o grande `campeao` desta `copa`", "text")
         text_list = [text_node, text_node_2]
     
         desired_result = [
@@ -136,7 +136,38 @@ class TestSplitNodesDelimiter(unittest.TestCase):
             TextNode("campeao", "code"),
             TextNode(" desta ", "text"),
             TextNode("copa", "code"),
-            TextNode('Eu serei', 'text')
-    
+            TextNode("Eu ", "text"),
+            TextNode("serei", "code"),
+            TextNode(" o grande ", "text"),
+            TextNode("campeao", "code"),
+            TextNode(" desta ", "text"),
+            TextNode("copa", "code"),
         ]
         self.assertEqual(split_nodes_delimiter(text_list, "`", "code"), desired_result)
+
+    def test_invalid_code_end(self):
+        text_node = TextNode("Eu `serei` o grande `campeao` desta `copa", "text")
+        text_list = [text_node]
+
+        with self.assertRaises(Exception) as context: 
+            result = split_nodes_delimiter(text_list, "`", 'code')
+
+        self.assertEqual(str(context.exception), "Closing Limiter not found, invalid Markdown Syntax")
+
+    def test_invalid_code_middle(self):
+        text_node = TextNode("Eu `serei o grande `campeao` desta `copa`", "text")
+        text_list = [text_node]
+
+        with self.assertRaises(Exception) as context: 
+            result = split_nodes_delimiter(text_list, "`", 'code')
+
+        self.assertEqual(str(context.exception), "Closing Limiter not found, invalid Markdown Syntax")
+    
+    def test_invalid_bold_with_italic(self):
+        text_node = TextNode("Eu *serei o grande* **campeao** desta copa**", "text")
+        text_list = [text_node]
+
+        with self.assertRaises(Exception) as context: 
+            result = split_nodes_delimiter(text_list, "**", 'bold')
+
+        self.assertEqual(str(context.exception), "Closing Limiter not found, invalid Markdown Syntax")

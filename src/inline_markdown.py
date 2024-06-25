@@ -3,47 +3,43 @@ from textnode import TextNode
 def split_nodes_delimiter(old_nodes, delimiter, text_type):
     final_list = []
     for node in old_nodes:
-        final_list += one_node_spliter([node], delimiter, text_type)
+        final_list += one_node_spliter(node, delimiter, text_type)
     return final_list
 
-def one_node_spliter(old_nodes, delimiter, text_type):
+def one_node_spliter(node, delimiter, text_type):
     new_nodes_list = []
+    old_nodes = [node]
     
-    for node in old_nodes:
-        old_size = len(old_nodes)
-        
-        if node.text_type != 'text':
-            new_nodes_list.append(node)
+    if node.text_type != 'text':
+        return old_nodes
+    
+    start_position = find_delimiter(node.text, delimiter)
 
-            if len(old_nodes) == 1:
-                return new_nodes_list
-        
-        
-        start_position = find_delimiter(node.text, delimiter)
+    if start_position == -1:
+        return old_nodes
+    
+    if start_position == len(node.text):
+        raise Exception("Closing Limiter not found, invalid Markdown Syntax")
 
-        if start_position == -1:
-            new_nodes_list.append(node)
-            continue
+    end_position = node.text.find(delimiter, start_position + len(delimiter))
 
-        end_position = node.text.find(delimiter, start_position + len(delimiter))
+    if end_position == -1:
+        raise Exception("Closing Limiter not found, invalid Markdown Syntax")
 
-        if end_position == -1:
-            raise Exception("Closing Limiter not found, invalid Markdown Syntax")
+    # skip creating text node when delimitter is on the start of text
+    if start_position != 0:
+        new_nodes_list.append(TextNode(node.text[:start_position], "text"))
 
-        # skip creating text node when delimitter is on the start of text
-        if start_position != 0:
-            new_nodes_list.append(TextNode(node.text[:start_position], "text"))
+    new_nodes_list.append(TextNode(node.text[start_position + len(delimiter):end_position], text_type))
 
-        new_nodes_list.append(TextNode(node.text[start_position + len(delimiter):end_position], text_type))
-
-        if node.text[end_position + len(delimiter):] != "":
-            new_nodes_list.append(TextNode(node.text[end_position + len(delimiter):], 'text'))
+    if node.text[end_position + len(delimiter):] != "":
+        new_nodes_list.append(TextNode(node.text[end_position + len(delimiter):], 'text'))
 
 
     if (len(old_nodes) == len(new_nodes_list)) or (new_nodes_list[-1].text_type != 'text'): 
         return new_nodes_list
     else:
-        final_list = new_nodes_list[:-1] + split_nodes_delimiter([new_nodes_list[-1]], delimiter, text_type)
+        final_list = new_nodes_list[:-1] + one_node_spliter(new_nodes_list[-1], delimiter, text_type)
         return final_list
 
 def find_delimiter(text, delimiter):
@@ -51,9 +47,11 @@ def find_delimiter(text, delimiter):
 
     if start_position == -1:
         return start_position
+    
+    try:
+        while text[start_position + 1] == delimiter:
+                start_position = text.find(delimiter, start_position + 2)
+    except IndexError:
+        raise Exception("Closing Limiter not found, invalid Markdown Syntax")
 
-   
-    while text[start_position + 1] == delimiter:
-            start_position = text.find(delimiter, start_position + 2)
-       
     return start_position
