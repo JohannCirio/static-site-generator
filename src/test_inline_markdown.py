@@ -3,6 +3,9 @@ import unittest
 from inline_markdown import split_nodes_delimiter
 from inline_markdown import extract_markdown_images
 from inline_markdown import extract_markdown_links
+from inline_markdown import split_nodes_image
+from inline_markdown import split_nodes_link
+from inline_markdown import text_to_text_node
 from textnode import TextNode
 
 class TestSplitNodesDelimiter(unittest.TestCase):
@@ -237,3 +240,220 @@ class TestImageExtractor(unittest.TestCase):
         
             self.assertEqual(extract_markdown_links(text), desired_result)
 
+class TestNodeImageSplitter(unittest.TestCase):
+
+    def test_one_node_img_present_middle(self):
+        text = "This is text with an ![alt text](http://blabla.com/img) and more text"
+        node = TextNode(text, "text")
+        nodes_list = [node]
+
+        desired_result = [
+            TextNode("This is text with an ", "text"),
+            TextNode("alt text", "image", "http://blabla.com/img"),
+            TextNode(" and more text", "text")
+        ]
+    
+        self.assertEqual(split_nodes_image(nodes_list), desired_result)
+
+    def test_one_node_img_present_beginning(self):
+        text = "![alt text](http://blabla.com/img) and more text"
+        node = TextNode(text, "text")
+        nodes_list = [node]
+        
+        desired_result = [
+            TextNode("alt text", "image", "http://blabla.com/img"),
+            TextNode(" and more text", "text")
+        ]
+    
+        self.assertEqual(split_nodes_image(nodes_list), desired_result)
+
+    def test_one_node_img_present_end(self):
+        text = "This is text with an ![alt text](http://blabla.com/img)"
+        node = TextNode(text, "text")
+        nodes_list = [node]
+        
+        desired_result = [
+            TextNode("This is text with an ", "text"),
+            TextNode("alt text", "image", "http://blabla.com/img")
+        ]
+    
+        self.assertEqual(split_nodes_image(nodes_list), desired_result)
+
+    def test_three_nodes_img_present_middle(self):
+        text = "This is text with an ![alt text](http://blabla.com/img) and more text"
+        node = TextNode(text, "text")
+        nodes_list = [node, node, node]
+
+        desired_result = [
+            TextNode("This is text with an ", "text"),
+            TextNode("alt text", "image", "http://blabla.com/img"),
+            TextNode(" and more text", "text"),
+            TextNode("This is text with an ", "text"),
+            TextNode("alt text", "image", "http://blabla.com/img"),
+            TextNode(" and more text", "text"),
+            TextNode("This is text with an ", "text"),
+            TextNode("alt text", "image", "http://blabla.com/img"),
+            TextNode(" and more text", "text")
+        ]
+    
+        self.assertEqual(split_nodes_image(nodes_list), desired_result)
+    
+    def test_one_node_three_imgs_present_middle(self):
+        text = "This is text with an ![alt text](http://blabla.com/img) and another ![text alt](http://google.com/img) and more text"
+        node = TextNode(text, "text")
+        nodes_list = [node]
+
+        desired_result = [
+            TextNode("This is text with an ", "text"),
+            TextNode("alt text", "image", "http://blabla.com/img"),
+            TextNode(" and another ", "text"),
+            TextNode("text alt", "image", "http://google.com/img"),
+            TextNode(" and more text", "text")
+        ]
+    
+        self.assertEqual(split_nodes_image(nodes_list), desired_result)
+
+    def test_one_node_three_imgs_start_middle_end(self):
+        text = "![alt text](http://blabla.com/img) and another ![text alt](http://google.com/img) and another ![text alt](http://google.com/img)"
+        node = TextNode(text, "text")
+        nodes_list = [node]
+
+        desired_result = [
+            TextNode("alt text", "image", "http://blabla.com/img"),
+            TextNode(" and another ", "text"),
+            TextNode("text alt", "image", "http://google.com/img"),
+            TextNode(" and another ", "text"),
+            TextNode("text alt", "image", "http://google.com/img"),
+        ]
+    
+        self.assertEqual(split_nodes_image(nodes_list), desired_result)
+    
+    def test_one_node_imgs_with_link(self):
+        text = "![alt text](http://blabla.com/img) and another link [text alt](http://google.com/img)"
+        node = TextNode(text, "text")
+        nodes_list = [node]
+
+        desired_result = [
+            TextNode("alt text", "image", "http://blabla.com/img"),
+            TextNode(" and another link [text alt](http://google.com/img)", "text"),
+        ]
+    
+        self.assertEqual(split_nodes_image(nodes_list), desired_result)
+
+class TestNodeLinkSplitter(unittest.TestCase):
+    def test_one_node_link_present_middle(self):
+        text = "This is text with a [link](http://blabla.com/link) and more text"
+        node = TextNode(text, "text")
+        nodes_list = [node]
+
+        desired_result = [
+            TextNode("This is text with a ", "text"),
+            TextNode("link", "link", "http://blabla.com/link"),
+            TextNode(" and more text", "text")
+        ]
+    
+        self.assertEqual(split_nodes_link(nodes_list), desired_result)
+
+    def test_one_node_link_present_beginning(self):
+        text = "[link](http://blabla.com/link) and more text"
+        node = TextNode(text, "text")
+        nodes_list = [node]
+        
+        desired_result = [
+            TextNode("link", "link", "http://blabla.com/link"),
+            TextNode(" and more text", "text")
+        ]
+    
+        self.assertEqual(split_nodes_link(nodes_list), desired_result)
+
+    def test_one_node_link_present_end(self):
+        text = "This is text with a [link](http://blabla.com/link)"
+        node = TextNode(text, "text")
+        nodes_list = [node]
+        
+        desired_result = [
+            TextNode("This is text with a ", "text"),
+            TextNode("link", "link", "http://blabla.com/link")
+        ]
+    
+        self.assertEqual(split_nodes_link(nodes_list), desired_result)
+
+    def test_three_nodes_link_present_middle(self):
+        text = "This is text with a [link](http://blabla.com/link) and more text"
+        node = TextNode(text, "text")
+        nodes_list = [node, node, node]
+
+        desired_result = [
+            TextNode("This is text with a ", "text"),
+            TextNode("link", "link", "http://blabla.com/link"),
+            TextNode(" and more text", "text"),
+            TextNode("This is text with a ", "text"),
+            TextNode("link", "link", "http://blabla.com/link"),
+            TextNode(" and more text", "text"),
+            TextNode("This is text with a ", "text"),
+            TextNode("link", "link", "http://blabla.com/link"),
+            TextNode(" and more text", "text")
+        ]
+    
+        self.assertEqual(split_nodes_link(nodes_list), desired_result)
+    
+    def test_one_node_two_links_present_middle(self):
+        text = "This is text with a [link text](http://blabla.com/link) and another [another link text](http://google.com/link) and more text"
+        node = TextNode(text, "text")
+        nodes_list = [node]
+
+        desired_result = [
+            TextNode("This is text with a ", "text"),
+            TextNode("link text", "link", "http://blabla.com/link"),
+            TextNode(" and another ", "text"),
+            TextNode("another link text", "link", "http://google.com/link"),
+            TextNode(" and more text", "text")
+        ]
+    
+        self.assertEqual(split_nodes_link(nodes_list), desired_result)
+
+    def test_one_node_three_links_start_middle_end(self):
+        text = "[link 1](http://blabla.com/link) and another [link 2](http://google.com/link) and another [link 3](http://google.com/link)"
+        node = TextNode(text, "text")
+        nodes_list = [node]
+
+        desired_result = [
+            TextNode("link 1", "link", "http://blabla.com/link"),
+            TextNode(" and another ", "text"),
+            TextNode("link 2", "link", "http://google.com/link"),
+            TextNode(" and another ", "text"),
+            TextNode("link 3", "link", "http://google.com/link"),
+        ]
+    
+        self.assertEqual(split_nodes_link(nodes_list), desired_result)
+    
+    def test_one_node_link_and_img(self):
+        text = "![alt text](http://blabla.com/img) and another link [link](http://google.com/link)"
+        node = TextNode(text, "text")
+        nodes_list = [node]
+
+        desired_result = [
+            TextNode("![alt text](http://blabla.com/img) and another link ", "text"),
+            TextNode("link", "link", "http://google.com/link"),
+        ]
+    
+        self.assertEqual(split_nodes_link(nodes_list), desired_result)
+
+class TestTextToTextNode(unittest.TestCase):
+    def test_from_boot_dev(self):
+        text = "This is **text** with an *italic* word and a `code block` and an ![image](https://storage.googleapis.com/qvault-webapp-dynamic-assets/course_assets/zjjcJKZ.png) and a [link](https://boot.dev)"
+        desired_result = [
+            TextNode("This is ", "text"),
+            TextNode("text", "bold"),
+            TextNode(" with an ", "text"),
+            TextNode("italic", "italic"),
+            TextNode(" word and a ", "text"),
+            TextNode("code block", "code"),
+            TextNode(" and an ", "text"),
+            TextNode("image", "image", "https://storage.googleapis.com/qvault-webapp-dynamic-assets/course_assets/zjjcJKZ.png"),
+            TextNode(" and a ", "text"),
+            TextNode("link", "link", "https://boot.dev"),
+        ]
+
+        self.assertEqual(text_to_text_node(text), desired_result)
+        

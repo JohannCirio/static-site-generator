@@ -4,14 +4,16 @@ from htmlnode import LeafNode
 from inline_markdown import split_nodes_delimiter
 from inline_markdown import extract_markdown_images
 from inline_markdown import extract_markdown_links
+from block_markdown import markdown_to_blocks
+from block_markdown import block_to_block_type
 
 def main():
-    text_with_img = "This is text with an ![image](https://storage.googleapis.com/qvault-webapp-dynamic-assets/course_assets/zjjcJKZ.png) and ![another](https://storage.googleapis.com/qvault-webapp-dynamic-assets/course_assets/dfsdkjfd.png)"
-    text_without_img = 'This is text'
-    text_with_img = "This is text with an [image](https://storage.googleapis.com/qvault-webapp-dynamic-assets/course_assets/zjjcJKZ.png) and ![another](https://storage.googleapis.com/qvault-webapp-dynamic-assets/course_assets/dfsdkjfd.png)"
-
-    print(extract_markdown_images(text_with_img))
-    print(extract_markdown_images(text_without_img))
-    print(extract_markdown_links(text_with_img))
+    text = "```  ```"
+    text1 = "``````"
+    text2 = "```    sdasda ```2"
+    text3 = "``` dasdas ```"
+    text12 = ">line\n>line\n>line22"
+    print(block_to_block_type(text2))
+    print(block_to_block_type(text12))
 
 main()
