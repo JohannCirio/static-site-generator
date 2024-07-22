@@ -3,8 +3,8 @@ from textnode import TextNode
 
 def text_to_text_node(text):
     text_nodes = [TextNode(text, 'text')]
-    text_nodes = split_nodes_delimiter(text_nodes, "*", 'italic')
     text_nodes = split_nodes_delimiter(text_nodes, "**", 'bold')
+    text_nodes = split_nodes_delimiter(text_nodes, "*", 'italic')
     text_nodes = split_nodes_delimiter(text_nodes, "`", 'code')
     text_nodes = split_nodes_link(text_nodes)
     text_nodes = split_nodes_image(text_nodes)

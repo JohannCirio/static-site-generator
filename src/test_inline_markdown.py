@@ -457,3 +457,12 @@ class TestTextToTextNode(unittest.TestCase):
 
         self.assertEqual(text_to_text_node(text), desired_result)
         
+    def test_from_example(self):
+        text = "**I like Tolkien**. Read my [first post here](/majesty) (sorry the link doesn't work yet)"
+        desired_result = [
+            TextNode("I like Tolkien", "bold"),
+            TextNode(". Read my ", "text"),
+            TextNode("first post here", "link" "/majesty"),
+            TextNode(" (sorry the link doesn't work yet)", "text"),
+        ]
+        self.assertEqual(text_to_text_node(text), desired_result)

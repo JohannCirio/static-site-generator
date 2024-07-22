@@ -1,7 +1,8 @@
 import unittest
 from block_markdown import markdown_to_blocks
-from block_markdown import markdown_to_blocks_solution
 from block_markdown import block_to_block_type
+
+from block_markdown import extract_title
 
 class TestMarkdownToBlocks(unittest.TestCase):
     def test_2_normal_blocks(self):
@@ -76,7 +77,7 @@ This is the same paragraph on a new line
         text = "Line1\n\n\n\n\n\n\n\n\nLine2\n\nLine3\n\n"
         desired_result = ["Line1", "Line2", "Line3"]
         
-        self.assertEqual(markdown_to_blocks_solution(text), desired_result)
+        self.assertEqual(markdown_to_blocks(text), desired_result)
 
 
 class TestBlockToBlockType(unittest.TestCase):
@@ -216,3 +217,15 @@ class TestBlockToBlockType(unittest.TestCase):
         self.assertNotEqual(block_to_block_type(block4), undesired_result)
         self.assertNotEqual(block_to_block_type(block5), undesired_result)
         self.assertNotEqual(block_to_block_type(block6), undesired_result)
+
+
+class TestMarkdownToHtml(unittest.TestCase):
+    def test_extract_title_beggining(self):
+        text = "# Gremio\n\nEu adoro pombos\n\n## Eu odeio pombox"
+        desired_result = "Gremio"
+        self.assertEqual(extract_title(text), desired_result)
+    
+    def test_extract_title_end(self):
+        text = "Eu adoro pombos\n\n## Eu odeio pombox\n\n # Gremio"
+        desired_result = "Gremio"
+        self.assertEqual(extract_title(text), desired_result)
