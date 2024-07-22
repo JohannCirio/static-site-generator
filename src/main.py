@@ -1,6 +1,6 @@
 from copy_static import copy_static
-from generate_page import generate_page
+from generate_page import generate_pages_recursive
 def main():
-   generate_page("./content/index.md", "./template.html", "./public/index.html")
+   generate_pages_recursive("./content", "./template.html", "./public")
 
 main()

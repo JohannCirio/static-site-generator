@@ -151,13 +151,13 @@ def quote_to_html(block):
     new_list_lines = []
 
     for line in list_lines:
-        new_list_lines.append(line[1:])
+        new_list_lines.append(line[2:])
 
     text = "\n".join(new_list_lines)
     text_nodes = text_to_text_node(text)
     leaf_nodes = list(map(text_node_to_html_node, text_nodes))
 
-    quote_html_node = ParentNode(children=leaf_nodes, tag="quote")
+    quote_html_node = ParentNode(children=leaf_nodes, tag="blockquote")
     return quote_html_node
 
 def ordered_list_to_html(block):
